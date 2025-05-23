@@ -95,6 +95,3 @@ def save_data_to_database(data: list[dict[str, Any]], database_name: str, params
                 )
     conn.commit()
     conn.close()
-
-
-
