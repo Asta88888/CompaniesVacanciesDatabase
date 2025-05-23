@@ -14,6 +14,8 @@ def create_database(database_name: str, params: dict) -> None:
     cur.close()
     conn.close()
 
+
+def create_tables(database_name, params):
     conn = psycopg2.connect(dbname=database_name, **params)
 
     with conn.cursor() as cur:
@@ -23,8 +25,9 @@ def create_database(database_name: str, params: dict) -> None:
         name VARCHAR(255) NOT NULL,
         open_vacancies INT,
         description TEXT,
-        url TEXT)
-        """)
+        url TEXT
+        );
+    """)
 
     with conn.cursor() as cur:
         cur.execute("""
@@ -35,33 +38,34 @@ def create_database(database_name: str, params: dict) -> None:
         work_format VARCHAR(100),
         salary_min DECIMAL(10, 2),
         salary_max DECIMAL(10, 2),
-        description TEXT)
-        """)
+        description TEXT
+        );
+    """)
     conn.commit()
     conn.close()
 
 
-def save_data_to_database(data: list[dict[str, Any]], database_name: str, params: dict) -> None:
-    """Сохранение информации о компаниях и вакансиях в таблицы базы данных"""
-    conn = psycopg2.connect(dbname=database_name, **params)
-    with conn.cursor() as cur:
-        for companies in data:
-            company_data = companies["items"]
-            cur.execute(
-                """
-                INSERT INTO companies (name, open_vacancies, description, url)
-                VALUES (%s, %s, %s, %s)
-                RETURNING company_id
-                """,
-                (
-                    company_data["name"],
-                    company_data["open_vacancies"],
-                    company_data["description"],
-                    company_data["alternate_url"]
-                )
-            )
-    conn.commit()
-    conn.close()
-
-
-
+# def save_data_to_database(data: list[dict[str, Any]], database_name: str, params: dict) -> None:
+#     """Сохранение информации о компаниях и вакансиях в таблицы базы данных"""
+#     conn = psycopg2.connect(dbname=database_name, **params)
+#     with conn.cursor() as cur:
+#         for companies in data:
+#             company_data = companies["items"]
+#             cur.execute(
+#                 """
+#                 INSERT INTO companies (name, open_vacancies, description, url)
+#                 VALUES (%s, %s, %s, %s)
+#                 RETURNING company_id
+#                 """,
+#                 (
+#                     company_data["name"],
+#                     company_data["open_vacancies"],
+#                     company_data["description"],
+#                     company_data["alternate_url"]
+#                 )
+#             )
+#     conn.commit()
+#     conn.close()
+#
+#
+#

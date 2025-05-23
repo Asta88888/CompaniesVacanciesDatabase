@@ -17,7 +17,7 @@ def get_companies(company_ids: list[int]) -> list[dict[str, Any]]:
     return companies
 
 
-def get_vacancies(company_id) -> dict[str, Any]:
+def get_vacancies(company_id) -> list[dict[str, Any]]:
     """Подключение к API HeadHunter для получения списка вакансий по заданному ID компании"""
     response = requests.get(f"https://api.hh.ru/vacancies", params={"employer_id": company_id, "per_page": 100})
     if response.status_code != 200:
