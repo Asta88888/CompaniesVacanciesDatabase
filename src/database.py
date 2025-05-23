@@ -66,33 +66,33 @@ def save_data_to_database(data: list[dict[str, Any]], database_name: str, params
                 )
             )
             company_id = cur.fetchone()[0]
-            #
-            # for vacancy in company.get("vacancies_url", []):
-            #
-            #     name = vacancy.get("name")
-            #     salary = vacancy.get("salary")
-            #     salary_min = salary["from"] if salary and salary.get("from") is not None else None
-            #     salary_max = salary["to"] if salary and salary.get("to") is not None else None
-            #     work_format = vacancy.get("schedule", {}).get("name")
-            #     snippet = vacancy.get("snippet", {})
-            #     description = snippet.get("requirement") or snippet.get("responsibility") or ""
-            #     vacancy_url = vacancy.get("alternate_url")
-            #
-            # cur.execute(
-            #         """
-            #         INSERT INTO vacancies (company_id, name, work_format, salary_min, salary_max, description)
-            #         VALUES (%s, %s, %s, %s, %s, %s, %s)
-            #         """,
-            #         (
-            #             company_id,
-            #             name,
-            #             work_format,
-            #             salary_min,
-            #             salary_max,
-            #             description,
-            #             vacancy_url
-            #         )
-            #     )
+
+            for vacancy in company.get("vacancies_url", []):
+
+                name = vacancy.get("name")
+                salary = vacancy.get("salary")
+                salary_min = salary["from"] if salary and salary.get("from") is not None else None
+                salary_max = salary["to"] if salary and salary.get("to") is not None else None
+                work_format = vacancy.get("schedule", {}).get("name")
+                snippet = vacancy.get("snippet", {})
+                description = snippet.get("requirement") or snippet.get("responsibility") or ""
+                vacancy_url = vacancy.get("alternate_url")
+
+            cur.execute(
+                    """
+                    INSERT INTO vacancies (company_id, name, work_format, salary_min, salary_max, description)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (
+                        company_id,
+                        name,
+                        work_format,
+                        salary_min,
+                        salary_max,
+                        description,
+                        vacancy_url
+                    )
+                )
     conn.commit()
     conn.close()
 
