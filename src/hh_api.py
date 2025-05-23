@@ -19,13 +19,24 @@ def get_companies(company_ids: list[int]) -> list[dict[str, Any]]:
 
 def get_vacancies(company_id) -> list[dict[str, Any]]:
     """Подключение к API HeadHunter для получения списка вакансий по заданному ID компании"""
-    response = requests.get(f"https://api.hh.ru/vacancies", params={"employer_id": company_id, "per_page": 100})
-    if response.status_code != 200:
-        raise Exception(f"Ошибка при запросе списка вакансий: {response.status_code}")
-    data = response.json()
-    return data
+    vacancies = []
+    page = 0
+    per_page = 100
+    while True:
+        response = requests.get(
+            "https://api.hh.ru/vacancies",
+            params={"employer_id": company_id, "per_page": per_page, "page": page}
+        )
+        if response.status_code != 200:
+            raise Exception(f"Ошибка при запросе списка вакансий: {response.status_code}")
+        data = response.json()
+        vacancies.extend(data.get("items", []))
+        if page >= data.get("pages", 0) - 1:
+            break
+        page += 1
+    return vacancies
 
 
 # if __name__ == "__main__":
-#     print(get_companies([1740, 3529, 78638, 15478, 64174, 3127, 4181, 4934, 3388, 80]))
-#     print(get_vacancies(1740))
+    # print(get_companies([1740, 3529, 78638, 15478, 64174, 3127, 4181, 4934, 3388, 80]))
+    # print(get_vacancies(1740))
