@@ -25,6 +25,7 @@ def create_tables(database_name, params):
         CREATE TABLE IF NOT EXISTS companies (
         company_id SERIAL PRIMARY KEY, 
         name VARCHAR(255) NOT NULL,
+        hh_company_id INT,
         open_vacancies INT,
         description TEXT,
         url TEXT
@@ -35,63 +36,73 @@ def create_tables(database_name, params):
         cur.execute("""
         CREATE TABLE IF NOT EXISTS vacancies (
         vacancy_id SERIAL PRIMARY KEY,
-        company_id INT REFERENCES companies(company_id),
         name VARCHAR(100) NOT NULL,
+        hh_company_id INT,
         work_format VARCHAR(100),
         salary_min DECIMAL(10, 2),
         salary_max DECIMAL(10, 2),
-        description TEXT
+        description TEXT,
+        url TEXT
         );
     """)
     conn.commit()
     conn.close()
 
 
-def save_data_to_database(data: list[dict[str, Any]], database_name: str, params: dict) -> None:
+def save_companies_to_database(data: list[dict[str, Any]], database_name: str, params: dict) -> None:
     """Сохранение информации о компаниях и вакансиях в таблицы базы данных"""
     conn = psycopg2.connect(dbname=database_name, **params)
     with conn.cursor() as cur:
         for company in data:
             cur.execute(
                 """
-                INSERT INTO companies (name, open_vacancies, description, url)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO companies (name, hh_company_id, open_vacancies, description, url)
+                VALUES (%s, %s, %s, %s, %s)
                 RETURNING company_id
                 """,
                 (
                     company.get("name"),
+                    company.get("id"),
                     company.get("open_vacancies"),
                     cleaner(company.get("description", "")),
                     company.get("alternate_url")
                 )
             )
-            company_id = cur.fetchone()[0]
+        conn.commit()
+        conn.close()
 
-            for vacancy in company.get("vacancies_url", []):
 
-                name = vacancy.get("name")
-                salary = vacancy.get("salary")
-                salary_min = salary["from"] if salary and salary.get("from") is not None else None
-                salary_max = salary["to"] if salary and salary.get("to") is not None else None
-                work_format = vacancy.get("schedule", {}).get("name")
-                snippet = vacancy.get("snippet", {})
-                description = snippet.get("requirement") or snippet.get("responsibility") or ""
-                vacancy_url = vacancy.get("alternate_url")
+def save_vacancies_to_database(vacancies: list[dict[str, Any]], database_name: str, params: dict) -> None:
+    """
+    Сохраняет вакансии
+    """
+    conn = psycopg2.connect(dbname=database_name, **params)
+    with conn.cursor() as cur:
+        for vacancy in vacancies:
+            name = vacancy.get("name")
+            hh_company_id = vacancy.get("employer").get("id")
+            salary = vacancy.get("salary")
+            salary_min = salary["from"] if salary and salary.get("from") is not None else None
+            salary_max = salary["to"] if salary and salary.get("to") is not None else None
+            work_format = vacancy.get("schedule", {}).get("name")
+            snippet = vacancy.get("snippet", {})
+            description = snippet.get("requirement") or snippet.get("responsibility") or ""
+            url = vacancy.get("alternate_url")
 
-            cur.execute(
-                    """
-                    INSERT INTO vacancies (company_id, name, work_format, salary_min, salary_max, description)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)
-                    """,
-                    (
-                        company_id,
-                        name,
-                        work_format,
-                        salary_min,
-                        salary_max,
-                        description,
-                        vacancy_url
-                    )
-                )
-    conn.commit()
-    conn.close()
+        cur.execute(
+            """
+            INSERT INTO vacancies (name, hh_company_id, work_format, salary_min, salary_max, description, url)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """,
+            (
+                name,
+                hh_company_id,
+                work_format,
+                salary_min,
+                salary_max,
+                description,
+                url
+            )
+        )
+        conn.commit()
+        conn.close()

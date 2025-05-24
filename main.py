@@ -1,5 +1,5 @@
 from src.hh_api import get_companies, get_vacancies
-from src.database import create_database, create_tables, save_data_to_database
+from src.database import create_database, create_tables, save_companies_to_database, save_vacancies_to_database
 from src.config import config
 
 
@@ -13,7 +13,10 @@ def main():
     companies = get_companies(company_ids)
     create_database("companiesvacancies", params)
     create_tables("companiesvacancies", params)
-    save_data_to_database(companies, "companiesvacancies", params)
+    save_companies_to_database(companies, "companiesvacancies", params)
+    for id in company_ids:
+        vacancies = get_vacancies(id)
+        save_vacancies_to_database(vacancies, "companiesvacancies", params)
 
 
 if __name__ == '__main__':

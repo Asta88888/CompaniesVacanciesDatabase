@@ -37,6 +37,4 @@ def get_vacancies(company_id) -> list[dict[str, Any]]:
     return vacancies
 
 
-# if __name__ == "__main__":
-    # print(get_companies([1740, 3529, 78638, 15478, 64174, 3127, 4181, 4934, 3388, 80]))
-    # print(get_vacancies(1740))
+
