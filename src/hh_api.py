@@ -17,7 +17,7 @@ def get_companies(company_ids: list[int]) -> list[dict[str, Any]]:
     return companies
 
 
-def get_vacancies(company_id) -> list[dict[str, Any]]:
+def get_vacancies(company_id: int) -> list[dict[str, Any]]:
     """Подключение к API HeadHunter для получения списка вакансий по заданному ID компании"""
     vacancies = []
     page = 0
@@ -35,6 +35,3 @@ def get_vacancies(company_id) -> list[dict[str, Any]]:
             break
         page += 1
     return vacancies
-
-
-
